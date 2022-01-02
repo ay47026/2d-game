@@ -1,3 +1,13 @@
+// Importing Sound Effects
+const introMusic = new Audio("./music/introSong.mp3");
+const shootingSound = new Audio("./music/shoooting.mp3");
+const killEnemySound = new Audio("./music/killEnemy.mp3");
+const gameOverSound = new Audio("./music/gameOver.mp3");
+const heavyWeaponSound = new Audio("./music/heavyWeapon.mp3");
+const hugeWeaponSound = new Audio("./music/hugeWeapon.mp3");
+
+introMusic.play();
+
 //Environment setup 
 const canvas =  document.createElement("canvas");
 document.querySelector(".myGame").appendChild(canvas);
@@ -8,13 +18,15 @@ const context = canvas.getContext('2d');
 // Basic functionaly
 let ligintWeightWeapon = 10;
 let heavyWeightWeapon = 30;
+let hugeWeightWeapon = 50;
 let difficulty = 2;
+let playerScore = 0 ;
 const form = document.querySelector("form");
 const scoreboard = document.querySelector(".scoreBoard");
 
 document.querySelector("input").addEventListener("click", (e) => {
  e.preventDefault();
-
+ introMusic.pause();
  form.style.display = "none";
  scoreboard.style.display = "block";
 
@@ -40,6 +52,31 @@ animation();
 });
 
 
+const gameoverLoader = () => {
+  const gameoverBanner = document.createElement("div");
+  const gameoverButton = document.createElement("button");
+  const highscore = document.createElement("div");
+
+
+  let playerhighscore =  localStorage.getItem("highscore") ? localStorage.getItem("highscore") : playerScore ;
+  gameoverButton.innerText = "Play game again";
+  highscore.innerHTML = "High score  " + (playerhighscore > playerScore ? playerhighscore : playerScore) ;
+  gameoverBanner.appendChild(highscore);
+  gameoverBanner.appendChild(gameoverButton);
+
+  if( playerScore >= playerhighscore ){
+      localStorage.setItem("highscore", playerScore);
+  }
+
+
+  gameoverButton.onclick = () => {
+     window.location.reload();
+  };
+
+  gameoverBanner.classList.add("gameover");
+  document.querySelector("body").appendChild(gameoverBanner);
+
+}
 
 
 playerPostion = {
@@ -107,6 +144,30 @@ class Weapon{
     }
  }
  
+ 
+class HugeWeapon{
+    constructor(x, y, damage){
+     this.x = x;
+     this.y = y;
+     this.color =  'pink';
+     this.damage = damage;
+    }
+ 
+    draw() {
+     context.beginPath();
+     context.fillStyle = this.color;
+     context.fillRect(this.x, this.y, 100, canvas.height) 
+     context.fill();
+    }
+    update(){
+        this.draw();
+        (this.x += 10)
+  
+    }
+ }
+ 
+
+
 //  *************************enemy class
 
 
@@ -194,6 +255,7 @@ class Partical{
 
 const weapons = [];
 const enemies = [];
+const hugeweapons = [];
 const particals = [];
 
 
@@ -232,12 +294,21 @@ const spawnEnemy = () => {
 let animationId ;
 function animation(){
     animationId = requestAnimationFrame(animation);
-
+    
     context.fillStyle = 'rgba(49, 49, 49, 0.2)'
 
     context.fillRect(0, 0, canvas.width, canvas.height);
     abhi.draw();
 
+    hugeweapons.forEach( (hugeweapon, hugeweaponIndex) => {
+        if(hugeweapon.alpha <= 0){
+            hugeweapons.splice(particalIndex, 1);
+        }
+        else{
+            hugeweapon.update();
+        }
+    });
+    
     particals.forEach( (partical, particalIndex) => {
         if(partical.alpha <= 0){
             particals.splice(particalIndex, 1);
@@ -248,8 +319,8 @@ function animation(){
       
     })
 
-    weapons.forEach( (weapon, weaponIndex) => {
-        weapon.update();
+        weapons.forEach( (weapon, weaponIndex) => {
+            weapon.update();
 
         if(
             weapon.x - weapon.radius < 1 ||
@@ -262,17 +333,38 @@ function animation(){
     });
     enemies.forEach( (enemy, enemyIndex) => {
         enemy.update();
+
+
+
+        hugeweapons.forEach(hugeweapon => {
+            const  distenceBetweenHugeWeaponAndEnemy = hugeweapon.x - enemy.x;
+            if(distenceBetweenHugeWeaponAndEnemy <= 200 &&  distenceBetweenHugeWeaponAndEnemy >= -200){
+                playerScore += 10;
+                scoreboard.innerHTML = "Score:" + playerScore;
+                setTimeout(() => {
+                    killEnemySound.play();
+                    enemies.splice(enemyIndex, 1);
+                   
+                }, 0); 
+            }
+         });
+
+         const distenceBetweenPlayerAndEnemy = Math.hypot(
+            abhi.x - enemy.x,
+            abhi.y - enemy.y
+        );
+    
+        if(distenceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1){
+           
+           cancelAnimationFrame(animationId);
+           gameOverSound.play();
+           return  gameoverLoader();
+           
+         }
+
         weapons.forEach( (weapon, weaponIndex) => {
 
-            const distenceBetweenPlayerAndEnemy = Math.hypot(
-                abhi.x - enemy.x,
-                abhi.y - enemy.y
-            );
-        
-            if(distenceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1){
-             
-               cancelAnimationFrame(animationId);
-             }
+          
 
             const distenceBetweenWeaponAndEnemy = Math.hypot(
                 weapon.x - enemy.x,
@@ -280,8 +372,6 @@ function animation(){
             );
 
             if(distenceBetweenWeaponAndEnemy - weapon.radius -enemy.radius < 1){
-
-              
 
                 if(enemy.radius  > weapon.damage + 5){
                     gsap.to(enemy, {
@@ -306,8 +396,11 @@ function animation(){
                             )
                         );
                     }
-    
+                    playerScore += 10;
+                    scoreboard.innerHTML = "Score:" + playerScore;
+                 
                     setTimeout(() => {
+                        killEnemySound.play();
                         enemies.splice(enemyIndex, 1);
                         weapons.splice(weaponIndex, 1);
                     }, 0); 
@@ -324,7 +417,7 @@ setInterval(spawnEnemy, 1000);
 
 //Event listener for weapon light (bulats)
 canvas.addEventListener("click", (e) => {
-
+    shootingSound.play();
     const myAngle = Math.atan2(
         e.clientY - canvas.height / 2,
         e.clientX - canvas.width / 2
@@ -349,11 +442,15 @@ canvas.addEventListener("click", (e) => {
 
 
 
-//Event listener for weapon light (bulats)
+//Event listener for weapon heavy (bulats)
 canvas.addEventListener('contextmenu', (e) => {
 
     e.preventDefault();
 
+    if(playerScore <= 0) return ;
+    heavyWeaponSound.play();
+    playerScore -= 5 ;
+    scoreboard.innerHTML = "Score:" + playerScore;
     const myAngle = Math.atan2(
         e.clientY - canvas.height / 2,
         e.clientX - canvas.width / 2
@@ -378,5 +475,21 @@ canvas.addEventListener('contextmenu', (e) => {
 
 
 addEventListener('keypress', (e) => {
-    console.log('key'+e.key);
+    if(playerScore <= 0) return ;
+    hugeWeaponSound.play();
+    playerScore -= 20 ;
+    scoreboard.innerHTML = "Score:" + playerScore;
+    if(e.key == " "){
+        hugeweapons.push(
+            new HugeWeapon(
+                0,
+                0,
+                hugeWeightWeapon
+            )
+        );
+    }
 });
+
+addEventListener("resize", (e) => {
+    window.location.reload();
+})
