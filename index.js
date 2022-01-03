@@ -1,12 +1,25 @@
 // Importing Sound Effects
-const introMusic = new Audio("./music/introSong.mp3");
+const introMusic = new Audio("./music/Monkeys-Spinning-Monkeys.mp3");
 const shootingSound = new Audio("./music/shoooting.mp3");
 const killEnemySound = new Audio("./music/killEnemy.mp3");
 const gameOverSound = new Audio("./music/gameOver.mp3");
 const heavyWeaponSound = new Audio("./music/heavyWeapon.mp3");
 const hugeWeaponSound = new Audio("./music/hugeWeapon.mp3");
 
+let flag = true;
+
 introMusic.play();
+ const introWindow = document.querySelector(".intro-window");
+ const form = document.querySelector("form");
+ const gotBtn = document.querySelector(".got-it-btn");
+
+
+ gotBtn.onclick  = () => {
+    
+   introWindow.style.display  = "none";
+   form.style.visibility = "visible";
+
+ }
 
 //Environment setup 
 const canvas =  document.createElement("canvas");
@@ -21,10 +34,12 @@ let heavyWeightWeapon = 30;
 let hugeWeightWeapon = 50;
 let difficulty = 2;
 let playerScore = 0 ;
-const form = document.querySelector("form");
+
 const scoreboard = document.querySelector(".scoreBoard");
 
 document.querySelector("input").addEventListener("click", (e) => {
+
+    flag = false;
  e.preventDefault();
  introMusic.pause();
  form.style.display = "none";
@@ -33,20 +48,20 @@ document.querySelector("input").addEventListener("click", (e) => {
  const usreValue = document.getElementById("difficulty").value;
 
  if(usreValue === "Easy"){
-    setInterval(spawnEnemy, 2000);
+    setInterval(spawnEnemy, 3000);
     difficulty = 1;
  }
  if(usreValue === "Medium"){
-    setInterval(spawnEnemy, 1400);
-    difficulty = 8;
+    setInterval(spawnEnemy, 200);
+    difficulty = 2;
 }
 if(usreValue === "Hard"){
-    setInterval(spawnEnemy, 1000);
-    difficulty = 10;
+    setInterval(spawnEnemy, 2000);
+    difficulty = 3;
 }
 if(usreValue === "Tnsane"){
-    setInterval(spawnEnemy, 700);
-    difficulty = 12;
+    setInterval(spawnEnemy, 1000);
+    difficulty = 4;
 }
 animation();
 });
@@ -60,7 +75,7 @@ const gameoverLoader = () => {
 
   let playerhighscore =  localStorage.getItem("highscore") ? localStorage.getItem("highscore") : playerScore ;
   gameoverButton.innerText = "Play game again";
-  highscore.innerHTML = "High score  " + (playerhighscore > playerScore ? playerhighscore : playerScore) ;
+  highscore.innerHTML = "High score:  " + (playerhighscore > playerScore ? playerhighscore : playerScore) ;
   gameoverBanner.appendChild(highscore);
   gameoverBanner.appendChild(gameoverButton);
 
@@ -95,17 +110,15 @@ class Player{
    }
 
    draw() {
+    let img  = document.createElement('img');
+      img.src = "./gun.png"; 
+      img.style.width = "40px";
+      img.style.height = "40px";
+
+      context.drawImage(img, this.x - 30, this.y - 30);
+     
     context.beginPath();
-    context.arc(
-            this.x,
-            this.y,
-            this.radius,
-            Math.PI / 180 * 0,
-            Math.PI / 180 * 360,
-            false
-        );
-    context.fillStyle = this.color;
-    context.fill();           
+           
        
    }
  
@@ -247,6 +260,7 @@ class Partical{
 // ****************************************** Main logic ********************************************
 
 // Creating Player
+
  const abhi =  new Player(
      playerPostion.x ,
      playerPostion.y , 15,
@@ -291,6 +305,8 @@ const spawnEnemy = () => {
     enemies.push( new Enemy(random.x, random.y, enemySize, enemyColor, velocity));
 }
 
+
+
 let animationId ;
 function animation(){
     animationId = requestAnimationFrame(animation);
@@ -298,7 +314,9 @@ function animation(){
     context.fillStyle = 'rgba(49, 49, 49, 0.2)'
 
     context.fillRect(0, 0, canvas.width, canvas.height);
-    abhi.draw();
+    
+    if( flag == false){ abhi.draw(); }
+  
 
     hugeweapons.forEach( (hugeweapon, hugeweaponIndex) => {
         if(hugeweapon.alpha <= 0){
@@ -318,9 +336,9 @@ function animation(){
         }
       
     })
-
-        weapons.forEach( (weapon, weaponIndex) => {
-            weapon.update();
+   
+    weapons.forEach( (weapon, weaponIndex) => {
+        weapon.update();
 
         if(
             weapon.x - weapon.radius < 1 ||
@@ -331,10 +349,12 @@ function animation(){
             weapons.splice(weaponIndex, 1);
         }
     });
+
+       
     enemies.forEach( (enemy, enemyIndex) => {
         enemy.update();
 
-
+        if(flag == true) return;
 
         hugeweapons.forEach(hugeweapon => {
             const  distenceBetweenHugeWeaponAndEnemy = hugeweapon.x - enemy.x;
@@ -412,7 +432,11 @@ function animation(){
     
 }
 
-setInterval(spawnEnemy, 1000);
+if(flag == true){
+    spawnEnemy();
+    animation();
+    
+}
 
 
 //Event listener for weapon light (bulats)
@@ -491,5 +515,6 @@ addEventListener('keypress', (e) => {
 });
 
 addEventListener("resize", (e) => {
-    window.location.reload();
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
 })
