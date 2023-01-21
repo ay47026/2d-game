@@ -1,5 +1,5 @@
 // Importing Sound Effects
-const introMusic = new Audio("./music/Monkeys-Spinning-Monkeys.mp3");
+const introMusic = new Audio("./music/Monkeys-Spinning-Monkeys.mp");
 const shootingSound = new Audio("./music/shoooting.mp3");
 const killEnemySound = new Audio("./music/killEnemy.mp3");
 const gameOverSound = new Audio("./music/gameOver.mp3");
@@ -34,16 +34,25 @@ let heavyWeightWeapon = 30;
 let hugeWeightWeapon = 50;
 let difficulty = 2;
 let playerScore = 0 ;
+let lifeLine = 6;
+let weaponSize = "normal";
 
 const scoreboard = document.querySelector(".scoreBoard");
+const lifeline = document.querySelector(".lifeline");
+const weapon_div = document.querySelector(".weapens");
+const normal = document.querySelector(".normal");
+const heavy = document.querySelector(".heavy");
+const huege = document.querySelector(".huege");
 
 document.querySelector("input").addEventListener("click", (e) => {
-
+  
     flag = false;
  e.preventDefault();
  introMusic.pause();
  form.style.display = "none";
  scoreboard.style.display = "block";
+ lifeline.style.visibility = "visible";
+ weapon_div.style.visibility = "visible";
 
  const usreValue = document.getElementById("difficulty").value;
 
@@ -123,6 +132,27 @@ class Player{
    }
  
 }
+
+// Player class
+class PlayerDirection{
+    constructor(x, y){
+     this.x = x;
+     this.y = y;
+
+    }
+ 
+    draw() {
+        context.beginPath();
+        context.moveTo(this.x-25, this.y+25);
+        context.lineTo(this.x-50, this.y);
+        context.lineTo(this.x-25, this.y-25);   
+        context.fillStyle = "white";
+        context.fill();
+
+        
+    }
+  
+ }
 
 
 
@@ -266,6 +296,11 @@ class Partical{
      playerPostion.y , 15,
     'white');
 
+    const dir=  new PlayerDirection(
+        playerPostion.x ,
+        playerPostion.y );
+      
+
 
 const weapons = [];
 const enemies = [];
@@ -309,6 +344,16 @@ const spawnEnemy = () => {
 
 let animationId ;
 function animation(){
+
+    if(playerScore > 100){
+        heavy.style.border = "6px solid cyan";
+        heavy.onclick = () => {
+            weaponSize = "heavy";
+            heavy.style.boxShadow = "0 0 10px white";
+            normal.style.boxShadow = "0 0 0px white";
+        }
+    }
+
     animationId = requestAnimationFrame(animation);
     
     context.fillStyle = 'rgba(49, 49, 49, 0.2)'
@@ -317,7 +362,7 @@ function animation(){
     
     if( flag == false){ abhi.draw(); }
   
-
+    // dir.draw();
     hugeweapons.forEach( (hugeweapon, hugeweaponIndex) => {
         if(hugeweapon.alpha <= 0){
             hugeweapons.splice(particalIndex, 1);
@@ -373,13 +418,19 @@ function animation(){
             abhi.x - enemy.x,
             abhi.y - enemy.y
         );
-    
-        if(distenceBetweenPlayerAndEnemy - abhi.radius - enemy.radius < 1){
-           
-           cancelAnimationFrame(animationId);
-           gameOverSound.play();
-           return  gameoverLoader();
-           
+   
+        if(Math.round(distenceBetweenPlayerAndEnemy - abhi.radius - enemy.radius) == 0){
+        
+            lifeLine -= 1;
+            gameOverSound.play();
+            lifeline.removeChild(lifeline.childNodes[0]);
+            
+         }
+         console.log(lifeLine);
+         if(lifeLine == 0){
+            cancelAnimationFrame(animationId);
+            
+            return  gameoverLoader();
          }
 
         weapons.forEach( (weapon, weaponIndex) => {
@@ -432,11 +483,6 @@ function animation(){
     
 }
 
-if(flag == true){
-    spawnEnemy();
-    animation();
-    
-}
 
 
 //Event listener for weapon light (bulats)
@@ -448,20 +494,46 @@ canvas.addEventListener("click", (e) => {
 
     )
 
+    
+    // const dir=  new PlayerDirection(
+    //     e.clientY - canvas.height / 2,
+    //     e.clientX - canvas.width / 2
+
+    // )
+      
+    
+    //    dir.draw();
+
+
     const velocity = {
         x:Math.cos(myAngle) * 6,
         y:Math.sin(myAngle) * 6
     }
-   weapons.push(
-       new Weapon(
-           canvas.width/2,
-           canvas.height/2,
-           6,
-           'white',
-           velocity,
-           ligintWeightWeapon
-       )
-   );
+    if(weaponSize == "normal"){
+        weapons.push(
+            new Weapon(
+                canvas.width/2,
+                canvas.height/2,
+                6,
+                'white',
+                velocity,
+                ligintWeightWeapon
+            )
+        );
+    }
+    if(weaponSize == "heavy"){
+        weapons.push(
+            new Weapon(
+                canvas.width/2,
+                canvas.height/2,
+                30,
+                'cyan',
+                velocity,
+                heavyWeightWeapon
+            )
+        );
+    }
+   
 }); 
 
 
@@ -495,6 +567,11 @@ canvas.addEventListener('contextmenu', (e) => {
            heavyWeightWeapon
        )
    );
+
+ 
+   
+
+
 }); 
 
 

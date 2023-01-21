@@ -67,7 +67,118 @@
     font-size: 15px;
     display: none;
   }
-  
+  .lifeline {
+    position: fixed;
+    top: 3%;
+    left: 5%;
+    font: 600 1.2vmax "Franklin Gothic Medium";
+    color: white;
+    font-size: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    visibility: hidden;
+  }
+  .lifeline div{
+    width:5px;
+    height: 10px;
+    background-color: #fff;
+    margin-right: 5px;
+  }
+
+  .weapens {
+    position: fixed;
+    top: 3%;
+    right: 5%;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    visibility: hidden;
+   
+  }
+  .weapens .normal{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border:  2px solid white;
+    background-color: white;
+    margin-right: 20px;
+    box-shadow: 0 0 10px white;
+  }
+  .weapens .heavy{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border:  2px solid cyan;
+    margin-right: 20px;
+  }
+
+  .weapens .huege{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border:  2px solid pink;
+  }
+
+  .weapens-intro {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+   
+  }
+  .weapens-intro .normal{
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border:  2px solid white;
+    background-color: white;
+    margin-right: 20px;
+    box-shadow: 0 0 10px white;
+  }
+  .weapens-intro .heavy{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    border:  2px solid cyan;
+    margin-right: 20px;
+  }
+
+  .weapens-intro .huege{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border:  2px solid pink;
+  }
+
   form {
     visibility: hidden;
     background-color: rgba(255, 255, 255, 0.158);
